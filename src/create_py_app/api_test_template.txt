@@ -1,0 +1,52 @@
+from datetime import datetime
+from typing import Iterable
+
+import pytest
+from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, sessionmaker
+
+import src.tables as tbl
+{% if di_setup %}from src.configure_services import get_db
+{% endif -%}
+from src.entry_points.api.app import app
+{% if not di_setup%}from src.entry_points.api.post_router import get_db{% endif %}
+from src.tables import Base
+
+engine = create_engine(
+    "sqlite:///unittest.db", connect_args={"check_same_thread": False}
+)
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+
+@pytest.fixture
+def session() -> Iterable[Session]:
+    Base.metadata.create_all(bind=engine)
+    db = TestingSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+    Base.metadata.drop_all(bind=engine)
+
+
+@pytest.fixture
+def client(session: Session):
+    def testing_get_db():
+        try:
+            yield session
+        finally:
+            session.close()
+
+    app.dependency_overrides[get_db] = testing_get_db
+    yield TestClient(app)
+
+
+def test_get_all_posts(client: TestClient, session: Session):
+    session.add(tbl.PostDto(created_at=datetime.utcnow(), content="some content"))
+    session.commit()
+    response = client.get("/posts/")
+    assert response.status_code == 200
+    assert 1 == len(response.json())
+    assert response.json()[0]["post_id"] == 1
+

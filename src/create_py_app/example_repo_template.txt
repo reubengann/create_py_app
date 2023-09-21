@@ -1,0 +1,18 @@
+from typing import Protocol
+
+from sqlalchemy import select
+
+from src.base_repo import BaseRepository, BaseSqlaRepository
+from src.tables import PostDto
+
+
+class PostRepository(BaseRepository, Protocol):
+    def get_config(self) -> list[PostDto]:
+        ...
+
+
+class SqlaPostRepository(PostRepository, BaseSqlaRepository):
+    def get_config(self) -> list[PostDto]:
+        rows = self.session.execute(select(PostDto)).scalars().all()
+        return list(rows)
+

@@ -1,0 +1,15 @@
+from pydantic_settings import BaseSettings
+
+
+class Settings(BaseSettings):
+    setting1: Optional[str]
+    setting2: Optional[str]
+    {%- if sqla %}
+    conn_str: Optional[str]{% endif %}
+
+    class Config:
+        env_file = ".env"
+
+
+settings = Settings.model_validate({})
+

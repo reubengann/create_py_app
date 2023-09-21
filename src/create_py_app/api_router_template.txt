@@ -1,0 +1,54 @@
+{% if sqla -%}
+from datetime import datetime
+
+from fastapi import APIRouter, Depends
+from pydantic import BaseModel
+from sqlalchemy import {% if not di_setup %}create_engine, {% endif %}select
+from sqlalchemy.orm import Session{% if not di_setup %}, sessionmaker{% endif %}
+
+{% if di_setup %}from src.configure_services import get_db{% endif %}
+from src.tables import PostDto
+{% if not di_setup %}
+
+engine = create_engine("sqlite://")
+session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+
+def get_db():
+    db = session_factory()
+    try:
+        yield db
+    finally:
+        db.close()
+
+{% endif %}
+router = APIRouter(prefix="/posts", tags=["Posts"])
+
+
+class PostResponse(BaseModel):
+    post_id: int
+    content: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+@router.get("/", response_model=list[PostResponse])
+async def get_posts(
+    db: Session = Depends(get_db),
+):
+    stmt = select(PostDto)
+    result = db.execute(stmt).scalars().all()
+    return result
+{% else -%}
+from fastapi import APIRouter
+
+router = APIRouter(prefix="/posts", tags=["Posts"])
+
+
+@router.get("/")
+async def get_posts():
+    return {"content": "Hello world!"}
+{% endif %}
+

@@ -1,0 +1,25 @@
+from datetime import datetime
+
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
+
+class Base(DeclarativeBase):
+    pass
+
+
+class PostDto(Base):
+    __tablename__ = "posts"
+    post_id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
+    created_at: Mapped[datetime]
+    content: Mapped[str]
+    comments: Mapped[list["CommentDto"]] = relationship(back_populates="post")
+
+
+class CommentDto(Base):
+    __tablename__ = "comments"
+    id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
+    content: Mapped[str]
+    post_id: Mapped[str] = mapped_column(ForeignKey("posts.post_id"))
+    post: Mapped["PostDto"] = relationship(back_populates="comments")
+

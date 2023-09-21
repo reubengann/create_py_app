@@ -1,0 +1,36 @@
+{% if use_logging %}import logging
+import logging.handlers{% endif -%}
+from datetime import datetime
+
+from apscheduler.schedulers.background import BlockingScheduler
+
+
+{% if use_logging %}def config_logger():
+    if settings.log_folder is None:
+        raise Exception("You must set a LOG_FOLDER in the environment")
+    log_formatter = logging.Formatter(
+        fmt="[%(asctime)s] %(levelname)s: %(message)s", datefmt="%m/%d/%Y %I:%M:%S %p"
+    )
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.INFO)
+    file_handler = logging.handlers.RotatingFileHandler(
+        f"{settings.log_folder}/run.log", maxBytes=5000000, backupCount=10
+    )
+    file_handler.setFormatter(log_formatter)
+    root_logger.addHandler(file_handler)
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(log_formatter)
+    root_logger.addHandler(console_handler)
+{% endif -%}
+def main():
+    print("Hello world")
+
+
+if __name__ == "__main__":
+    {%- if use_logging -%}config_logger(){%- endif %}
+    scheduler = BlockingScheduler({"apscheduler.timezone": "UTC"})
+    scheduler.add_job(
+        main, trigger="interval", minutes=10, next_run_time=datetime.utcnow()
+    )
+    scheduler.start()
+

@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=67.8.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "create_py_app"
+version = "0.0.1"
+authors = [
+  { name="Reuben Gann", email="reubengann@gmail.com" },
+]
+description = "A utility for scaffolding a Python app"
+readme = "readme.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+  'windows-curses; sys_platform == "win32"',
+  'jinja2'
+]
+
+[project.scripts]
+create_py_app = "create_py_app.command:main"
+
+[tools.setuptools.packages.find]
+where = ["src"]
+
+[tools.setuptools.package-data]
+create_py_app = ["*.txt"]

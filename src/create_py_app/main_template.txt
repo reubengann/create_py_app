@@ -1,0 +1,61 @@
+{% if parse_args %}import argparse
+{% endif -%}
+{% if use_logging %}import logging
+{% endif -%}
+import sys
+{% if env_settings %}
+from src.project_settings import settings
+{% endif %}
+
+def main() -> int:
+{%- if use_logging %}
+    logging.basicConfig(
+        format="[%(asctime)s] %(message)s",
+        datefmt="%m/%d/%Y %I:%M:%S %p",
+        level=logging.INFO,
+    )
+{% endif %}
+{%- if empty_main %}
+    return 0
+{% endif %}
+
+{%- if parse_args %}
+    parser = argparse.ArgumentParser()
+    subp = parser.add_subparsers(
+        dest="subparser_name",
+        help="Your help message",
+    )
+
+    # Add commands
+    cmd1_p = subp.add_parser("cmd1", help="Do command 1")
+    cmd2_p = subp.add_parser("cmd2", help="Do command 2")
+
+    # Add command line arguments to the commands
+    # cmd1_p.add_argument("query")
+    args = parser.parse_args()
+    match args.subparser_name:
+        case "cmd1":
+{%- if logging %}
+            logging.info("Running command 1")
+{% else %}
+            print("Running command 1")
+{%- endif %}
+            return 0
+        case "cmd2":
+{%- if logging %}
+            logging.info("Running command 2")
+{% else %}
+            print("Running command 2")
+{%- endif %}
+            return 0
+        case _:
+            parser.print_help()
+            return 1
+{% endif %}
+
+if __name__ == "__main__":
+    sys.exit(main())
+{% if rest %}
+    # OR
+    # asyncio.run(main())
+{% endif %}

@@ -1,0 +1,30 @@
+{% if blank_configure_services %}def get_some_service():
+    return None
+{% endif %}{% if sqla %}from typing import Callable, Generator
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, sessionmaker
+{% if env_settings %}
+from src.project_settings import settings
+{% endif %}
+
+def get_sync_session_factory() -> Callable[[], Session]:
+    {%- if env_settings %}
+    if settings.conn_str is None:
+        raise Exception("Must define CONN_STR")
+    engine = create_engine(settings.conn_str){% else %}
+    engine = create_engine("sqlite://"){% endif %}
+    session_maker = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    return session_maker
+
+
+sync_session_factory = get_sync_session_factory()
+
+
+def get_db() -> Generator[Session, None, None]:
+    db = sync_session_factory()
+    try:
+        yield db
+    finally:
+        db.close()
+{% endif %}

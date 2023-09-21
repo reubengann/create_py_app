@@ -1,0 +1,15 @@
+{% if env_settings -%}
+pydantic-settings[dotenv]
+{% endif %}
+{%- if sqla -%}
+SQLAlchemy
+{% endif %}
+{%- if fast_api -%}
+fastapi
+uvicorn[standard]
+httpx
+{% endif %}
+{%- if scheduled_job -%}
+apscheduler
+{% endif %}
+

@@ -1,0 +1,4 @@
+SETTING1=foo
+SETTING2=bar
+{% if sqla %}CONN_STR=sqlite://{% endif %}
+

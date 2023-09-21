@@ -1,0 +1,28 @@
+from typing import Protocol, Self
+from sqlalchemy.orm import Session
+
+
+class BaseRepository(Protocol):
+    def __enter__(self) -> Self:
+        ...
+
+    def __exit__(self, *args):
+        ...
+
+    def commit(self):
+        ...
+
+
+class BaseSqlaRepository(BaseRepository):
+    def __init__(self, session: Session) -> None:
+        self.session = session
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(self, *args):
+        self.session.close()
+
+    def commit(self):
+        self.session.commit()
+
