@@ -3,8 +3,8 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    setting1: Optional[str]
-    setting2: Optional[str]
+    setting1: Optional[str] = None
+    setting2: Optional[str] = None
     {%- if sqla %}
     conn_str: Optional[str]{% endif %}
 
