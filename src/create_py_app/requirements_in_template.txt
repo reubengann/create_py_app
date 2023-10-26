@@ -1,5 +1,5 @@
 {% if env_settings -%}
-pydantic-settings[dotenv]
+pydantic-settings
 {% endif %}
 {%- if sqla -%}
 SQLAlchemy
