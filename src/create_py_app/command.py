@@ -266,5 +266,6 @@ def main() -> int:
     scaffolder = Scaffolder(project_name, dest_folder, options)
     scaffolder.write()
     print("Project written. Now run\n")
+    print(f"cd {project_name}")
     print("pip install -r requirements.in -r requirements-dev.in")
     return 0
