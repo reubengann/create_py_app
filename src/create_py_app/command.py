@@ -59,6 +59,7 @@ class Scaffolder:
         print(f"Writing output to folder {self.project_folder.resolve()}")
         self.maybe_initialize_git()
         self.maybe_create_folders()
+        (self.src_folder / "__init__.py").touch()
         self.create_requirements()
         self.create_coverage()
         self.set_up_testing()
