@@ -261,7 +261,7 @@ def main() -> int:
     # print(selected)
     if not dest_folder.exists():
         dest_folder.mkdir()
-    selected_option_names = [o[0] for o in selected]
+    selected_option_names = [o for o in selected]
     options = parse_options(selected_option_names)
     scaffolder = Scaffolder(project_name, dest_folder, options)
     scaffolder.write()
