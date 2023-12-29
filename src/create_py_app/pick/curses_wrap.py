@@ -23,7 +23,7 @@ class Screen(Protocol):
         ...
 
 
-def run_and_return_result(st: Callable[[Screen], list[str] | None]) -> list[str | None]:
+def run_and_return_result(st: Callable[[Screen], list[str] | None]) -> list[str] | None:
     return curses.wrapper(st)  # type: ignore
 
 

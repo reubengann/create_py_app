@@ -1,4 +1,5 @@
 import argparse
+from enum import Enum
 import subprocess
 from dataclasses import dataclass
 from importlib import resources
@@ -7,7 +8,18 @@ from pathlib import Path
 import jinja2
 
 import create_py_app
-from create_py_app.pick import pick
+from create_py_app.pick import pick_multi, pick_single
+
+
+class KindOfThing(Enum):
+    PROGRAM = 0
+    TOOL = 1
+
+
+KINDS_OF_THING = {
+    "Program (something you run)": KindOfThing.PROGRAM,
+    "Tool    (something you pip install)": KindOfThing.TOOL,
+}
 
 OPTIONS = [
     "Main script",
@@ -47,8 +59,13 @@ def get_template(template_name: str):
 
 class Scaffolder:
     def __init__(
-        self, project_name: str, project_folder: Path, options: ScaffoldOptions
+        self,
+        kind_of_thing: KindOfThing,
+        project_name: str,
+        project_folder: Path,
+        options: ScaffoldOptions,
     ) -> None:
+        self.kind_of_thing = kind_of_thing
         self.project_name = project_name
         self.project_folder = project_folder
         self.options = options
@@ -255,8 +272,14 @@ def main() -> int:
     ):
         print(f"Folder {dest_folder} is not empty. Refusing to do anything")
         return 1
+
+    selected_kind = pick_single(
+        [k for k in KINDS_OF_THING],
+        "Choose what kind of thing you're making",
+    )
+    kind_of_thing = KINDS_OF_THING[selected_kind]
     title = "Please choose your options (press SPACE to mark, ENTER to continue, ESC or q to quit): "
-    selected = pick(OPTIONS, title)
+    selected = pick_multi(OPTIONS, title)
     if selected is None:
         return 0
     # print(selected)
@@ -264,7 +287,7 @@ def main() -> int:
         dest_folder.mkdir()
     selected_option_names = [o for o in selected]
     options = parse_options(selected_option_names)
-    scaffolder = Scaffolder(project_name, dest_folder, options)
+    scaffolder = Scaffolder(kind_of_thing, project_name, dest_folder, options)
     scaffolder.write()
     print("Project written. Now run\n")
     print(f"cd {project_name}")
