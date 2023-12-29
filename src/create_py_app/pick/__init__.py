@@ -3,23 +3,14 @@
 import curses
 import curses.ascii
 from typing import Protocol
+from create_py_app.pick.curses_wrap import (
+    CursesWrapper,
+    Screen,
+    config_curses,
+    run_and_return_result,
+)
 
-
-class Screen(Protocol):
-    def getmaxyx(self) -> tuple[int, int]:
-        ...
-
-    def clear(self):
-        ...
-
-    def addnstr(self, y: int, x: int, s: str, n: int):
-        ...
-
-    def refresh(self):
-        ...
-
-    def getch(self) -> int:
-        ...
+import create_py_app.pick.keycodes as kc
 
 
 INDICATOR = "*"
@@ -28,11 +19,11 @@ SYMBOL_EMPTY_CIRCLE = "( )"
 VS_CODE_KEY_UP = 450
 VS_CODE_KEY_DOWN = 456
 
-KEYS_ENTER = (curses.KEY_ENTER, ord("\n"), ord("\r"))
-KEYS_UP = (curses.KEY_UP, ord("k"), VS_CODE_KEY_UP)
-KEYS_DOWN = (curses.KEY_DOWN, ord("j"), VS_CODE_KEY_DOWN)
-QUIT_KEYS = (curses.ascii.ESC, ord("q"))
-KEYS_SELECT = (curses.KEY_RIGHT, ord(" "))
+KEYS_ENTER = (kc.KEY_ENTER, ord("\n"), ord("\r"))
+KEYS_UP = (kc.KEY_UP, ord("k"), VS_CODE_KEY_UP)
+KEYS_DOWN = (kc.KEY_DOWN, ord("j"), VS_CODE_KEY_DOWN)
+QUIT_KEYS = (kc.ESC, ord("q"))
+KEYS_SELECT = (kc.KEY_RIGHT, ord(" "))
 
 
 class Picker:
@@ -127,22 +118,12 @@ class Picker:
         current_line = self.index + len(title_lines) + 1
         return lines, current_line
 
-    def start(self):
-        return curses.wrapper(self._start)
+    def start(self) -> list[str | None]:
+        return run_and_return_result(self._start)
 
     def _start(self, screen: Screen):
-        self.config_curses()
+        config_curses()
         return self.run_loop(screen)
-
-    def config_curses(self) -> None:
-        try:
-            # use the default colors of the terminal
-            curses.use_default_colors()
-            # hide the cursor
-            curses.curs_set(0)
-        except:
-            # Curses failed to initialize color support, eg. when TERM=vt100
-            curses.initscr()
 
 
 def pick(options: list[str], title: str):
