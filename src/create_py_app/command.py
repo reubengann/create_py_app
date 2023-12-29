@@ -22,17 +22,21 @@ KINDS_OF_THING = {
 }
 
 PROGRAM_OPTIONS = [
-    "Main script",
-    "FastAPI entry point",
-    "Scheduled job",
-    "Logging",
-    "ENV settings",
-    "Set up Sqlalchemy ORM",
-    "Set up repository design pattern",
-    "Set up a file for configuring dependency injection",
+    ("Main script", False),
+    ("FastAPI entry point", False),
+    ("Scheduled job", False),
+    ("Logging", False),
+    ("ENV settings", False),
+    ("Set up Sqlalchemy ORM", False),
+    ("Set up repository design pattern", False),
+    ("Set up a file for configuring dependency injection", False),
 ]
 
-COMMON_OPTIONS = ["Set up VS Code", "Command line arguments", "Set up Git"]
+COMMON_OPTIONS = [
+    ("Set up VS Code", True),
+    ("Set up Git", True),
+    ("Command line arguments", False),
+]
 
 
 @dataclass

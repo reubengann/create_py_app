@@ -84,15 +84,15 @@ class Picker(ABC):
 
 
 class MultiOptionsPicker(Picker):
-    def __init__(
-        self, options: list[str], title: str, default_to_enabled=False
-    ) -> None:
+    def __init__(self, options: list[tuple[str, bool]], title: str) -> None:
         self.index = 0
         self.selected_indexes: list[int] = []
         self.title = title
-        self.options = options
-        if default_to_enabled:
-            self.selected_indexes = list(range(len(options)))
+        self.options = [o[0] for o in options]
+        self.selected_indexes = []
+        for i, opt in enumerate(options):
+            if opt[1]:
+                self.selected_indexes.append(i)
 
     def run_loop(self, screen: Screen) -> list[str] | None:
         while True:
