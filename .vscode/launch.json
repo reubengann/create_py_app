@@ -5,7 +5,7 @@
             "name": "Run Main",
             "type": "python",
             "request": "launch",
-            "program": "create_py_app.py",
+            "program": "src\\create_py_app\\command.py",
             "justMyCode": true,
             "args": [
                 "foo"

@@ -4,6 +4,7 @@ import subprocess
 from dataclasses import dataclass
 from importlib import resources
 from pathlib import Path
+import sys
 
 import jinja2
 
@@ -257,10 +258,14 @@ class Scaffolder:
         if not vs_code_folder.exists():
             vs_code_folder.mkdir()
         template = get_template("vs_code_launch_json_template.txt")
+        if self.kind_of_thing == KindOfThing.TOOL:
+            entrypoint = f"src\\{self.project_name}\\command.py"
+        else:
+            entrypoint = f"{self.project_name}.py"
         (vs_code_folder / "launch.json").write_text(
             template.render(
                 {
-                    "entrypoint": f"{self.project_name}.py",
+                    "entrypoint": entrypoint,
                     "fast_api": self.options.fast_api,
                     "scheduled_job": self.options.scheduled_job,
                     "has_args": self.options.parse_args,
@@ -331,3 +336,7 @@ def main() -> int:
     else:
         print(f"pip install -e ./{project_name}")
     return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
