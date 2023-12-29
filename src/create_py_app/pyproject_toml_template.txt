@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=67.8.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "{{appname}}"
+version = "0.0.1"
+authors = []
+description = "Add a description"
+readme = "readme.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+dependencies = []
+
+[project.scripts]
+{{appname}} = "{{appname}}.command:main"
+
+[tools.setuptools.packages.find]
+where = ["src"]

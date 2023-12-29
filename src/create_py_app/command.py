@@ -79,16 +79,17 @@ def get_template(template_name: str):
 class Scaffolder:
     def __init__(
         self,
-        kind_of_thing: KindOfThing,
         project_name: str,
         project_folder: Path,
         options: ScaffoldOptions,
     ) -> None:
-        self.kind_of_thing = kind_of_thing
+        self.kind_of_thing = options.kind
         self.project_name = project_name
         self.project_folder = project_folder
         self.options = options
         self.src_folder = self.project_folder / "src"
+        if self.kind_of_thing == KindOfThing.TOOL:
+            self.src_folder = self.src_folder / project_name
         self.test_folder = self.project_folder / "test"
 
     def write(self):
@@ -97,16 +98,20 @@ class Scaffolder:
             self.maybe_initialize_git()
         self.maybe_create_folders()
         (self.src_folder / "__init__.py").touch()
-        self.create_requirements()
+        if self.kind_of_thing == KindOfThing.PROGRAM:
+            self.create_requirements()
         self.create_coverage()
         self.set_up_testing()
         self.make_readme()
+        if self.options.kind == KindOfThing.TOOL:
+            self.write_pyproject_toml()
+            self.write_main_script(self.src_folder / "command.py")
         if self.options.vs_code:
             self.write_vs_code_settings()
         if self.options.env_settings:
             self.set_up_env_settings()
         if self.options.write_main_script:
-            self.write_main_script()
+            self.write_main_script(self.project_folder / f"{self.project_name}.py")
         if self.options.sqla:
             self.set_up_sqla()
         if self.options.repo_pattern:
@@ -231,6 +236,9 @@ class Scaffolder:
         (self.project_folder / "requirements-dev.in").write_text(template.render())
 
     def maybe_create_folders(self):
+        if self.kind_of_thing == KindOfThing.TOOL:
+            if not self.src_folder.parent.exists():
+                self.src_folder.parent.mkdir()
         if not self.src_folder.exists():
             self.src_folder.mkdir()
         if not self.test_folder.exists():
@@ -261,7 +269,7 @@ class Scaffolder:
         template = get_template("vs_code_settings_template.txt")
         (vs_code_folder / "settings.json").write_text(template.render())
 
-    def write_main_script(self):
+    def write_main_script(self, target: Path):
         template = get_template("main_template.txt")
         context = {
             "use_logging": self.options.use_logging,
@@ -270,9 +278,12 @@ class Scaffolder:
         }
         if not self.options.parse_args:
             context["empty_main"] = True
-        (self.project_folder / f"{self.project_name}.py").write_text(
-            template.render(context)
-        )
+        target.write_text(template.render(context))
+
+    def write_pyproject_toml(self):
+        template = get_template("pyproject_toml_template.txt")
+        context = {"appname": self.project_name}
+        (self.project_folder / f"pyproject.toml").write_text(template.render(context))
 
 
 def main() -> int:
@@ -310,7 +321,7 @@ def main() -> int:
         dest_folder.mkdir()
     selected_option_names = [o for o in selected]
     options = parse_options(kind_of_thing, selected_option_names)
-    scaffolder = Scaffolder(kind_of_thing, project_name, dest_folder, options)
+    scaffolder = Scaffolder(project_name, dest_folder, options)
     scaffolder.write()
     print("Project written. Now run\n")
     if kind_of_thing == KindOfThing.PROGRAM:
