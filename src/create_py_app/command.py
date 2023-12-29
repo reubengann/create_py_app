@@ -21,22 +21,23 @@ KINDS_OF_THING = {
     "Tool    (something you pip install)": KindOfThing.TOOL,
 }
 
-OPTIONS = [
+PROGRAM_OPTIONS = [
     "Main script",
     "FastAPI entry point",
-    "Command line arguments",
     "Scheduled job",
     "Logging",
     "ENV settings",
-    "Set up VS Code",
     "Set up Sqlalchemy ORM",
     "Set up repository design pattern",
     "Set up a file for configuring dependency injection",
 ]
 
+COMMON_OPTIONS = ["Set up VS Code", "Command line arguments", "Set up Git"]
+
 
 @dataclass
 class ScaffoldOptions:
+    kind: KindOfThing
     write_main_script: bool
     fast_api: bool
     parse_args: bool
@@ -47,10 +48,24 @@ class ScaffoldOptions:
     sqla: bool
     repo_pattern: bool
     di_setup: bool
+    set_up_git: bool
 
 
-def parse_options(selected: list[str]) -> ScaffoldOptions:
-    return ScaffoldOptions(*[o in selected for o in OPTIONS])
+def parse_options(kind: KindOfThing, selected: list[str]) -> ScaffoldOptions:
+    return ScaffoldOptions(
+        kind=kind,
+        write_main_script="Main script" in selected,
+        fast_api="FastAPI entry point" in selected,
+        parse_args="Command line arguments" in selected,
+        scheduled_job="Scheduled job" in selected,
+        use_logging="Logging" in selected,
+        env_settings="ENV settings" in selected,
+        vs_code="Set up VS Code" in selected,
+        sqla="Set up Sqlalchemy ORM" in selected,
+        repo_pattern="Set up repository design pattern" in selected,
+        di_setup="Set up a file for configuring dependency injection" in selected,
+        set_up_git="Set up Git" in selected,
+    )
 
 
 def get_template(template_name: str):
@@ -74,7 +89,8 @@ class Scaffolder:
 
     def write(self):
         print(f"Writing output to folder {self.project_folder.resolve()}")
-        self.maybe_initialize_git()
+        if self.options.set_up_git:
+            self.maybe_initialize_git()
         self.maybe_create_folders()
         (self.src_folder / "__init__.py").touch()
         self.create_requirements()
@@ -279,17 +295,23 @@ def main() -> int:
     )
     kind_of_thing = KINDS_OF_THING[selected_kind]
     title = "Please choose your options (press SPACE to mark, ENTER to continue, ESC or q to quit): "
-    selected = pick_multi(OPTIONS, title)
+    options = COMMON_OPTIONS
+    if kind_of_thing == KindOfThing.PROGRAM:
+        options += PROGRAM_OPTIONS
+    selected = pick_multi(options, title)
     if selected is None:
         return 0
     # print(selected)
     if not dest_folder.exists():
         dest_folder.mkdir()
     selected_option_names = [o for o in selected]
-    options = parse_options(selected_option_names)
+    options = parse_options(kind_of_thing, selected_option_names)
     scaffolder = Scaffolder(kind_of_thing, project_name, dest_folder, options)
     scaffolder.write()
     print("Project written. Now run\n")
-    print(f"cd {project_name}")
-    print("pip install -r requirements.in -r requirements-dev.in")
+    if kind_of_thing == KindOfThing.PROGRAM:
+        print(f"cd {project_name}")
+        print("pip install -r requirements.in -r requirements-dev.in")
+    else:
+        print(f"pip install -e ./{project_name}")
     return 0
