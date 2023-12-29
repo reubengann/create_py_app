@@ -1,5 +1,6 @@
 # Adapted from https://github.com/wong2/pick
 
+from abc import ABC, abstractmethod
 from create_py_app.pick.curses_wrap import (
     Screen,
     config_curses,
@@ -22,7 +23,67 @@ QUIT_KEYS = (kc.ESC, ord("q"))
 KEYS_SELECT = (kc.KEY_RIGHT, ord(" "))
 
 
-class MultiOptionsPicker:
+class Picker(ABC):
+    options: list[str]
+    title: str
+
+    @abstractmethod
+    def get_option_lines(self) -> list[str]:
+        pass
+
+    @abstractmethod
+    def run_loop(self, screen: Screen) -> list[str] | None:
+        pass
+
+    def move_up(self) -> None:
+        self.index -= 1
+        if self.index < 0:
+            self.index = len(self.options) - 1
+
+    def move_down(self) -> None:
+        self.index += 1
+        if self.index >= len(self.options):
+            self.index = 0
+
+    def draw(self, screen: Screen):
+        screen.clear()
+        x, y = 1, 1
+        max_y, max_x = screen.getmaxyx()
+        max_rows = max_y - y
+        lines, current_line = self.get_lines()
+        scroll_top = 0
+        if current_line > max_rows:
+            scroll_top = current_line - max_rows
+
+        lines_to_draw = lines[scroll_top : scroll_top + max_rows]
+
+        for line in lines_to_draw:
+            screen.addnstr(y, x, line, max_x - 2)
+            y += 1
+
+        screen.refresh()
+
+    def get_title_lines(self) -> list[str]:
+        if self.title:
+            return self.title.split("\n") + [""]
+        return []
+
+    def get_lines(self) -> tuple[list[str], int]:
+        title_lines = self.get_title_lines()
+        option_lines = self.get_option_lines()
+        lines = title_lines + option_lines
+        current_line = self.index + len(title_lines) + 1
+        return lines, current_line
+
+    def start(self) -> list[str] | None:
+        return run_and_return_result(self._start)
+
+    def _start(self, screen: Screen):
+        config_curses()
+        return self.run_loop(screen)
+
+
+class MultiOptionsPicker(Picker):
     def __init__(
         self, options: list[str], title: str, default_to_enabled=False
     ) -> None:
@@ -56,39 +117,6 @@ class MultiOptionsPicker:
         else:
             self.selected_indexes.append(self.index)
 
-    def move_up(self) -> None:
-        self.index -= 1
-        if self.index < 0:
-            self.index = len(self.options) - 1
-
-    def move_down(self) -> None:
-        self.index += 1
-        if self.index >= len(self.options):
-            self.index = 0
-
-    def draw(self, screen: Screen):
-        screen.clear()
-        x, y = 1, 1
-        max_y, max_x = screen.getmaxyx()
-        max_rows = max_y - y
-        lines, current_line = self.get_lines()
-        scroll_top = 0
-        if current_line > max_rows:
-            scroll_top = current_line - max_rows
-
-        lines_to_draw = lines[scroll_top : scroll_top + max_rows]
-
-        for line in lines_to_draw:
-            screen.addnstr(y, x, line, max_x - 2)
-            y += 1
-
-        screen.refresh()
-
-    def get_title_lines(self) -> list[str]:
-        if self.title:
-            return self.title.split("\n") + [""]
-        return []
-
     def get_option_lines(self) -> list[str]:
         lines: list[str] = []
         for index, option in enumerate(self.options):
@@ -107,22 +135,8 @@ class MultiOptionsPicker:
 
         return lines
 
-    def get_lines(self) -> tuple[list[str], int]:
-        title_lines = self.get_title_lines()
-        option_lines = self.get_option_lines()
-        lines = title_lines + option_lines
-        current_line = self.index + len(title_lines) + 1
-        return lines, current_line
 
-    def start(self) -> list[str] | None:
-        return run_and_return_result(self._start)
-
-    def _start(self, screen: Screen):
-        config_curses()
-        return self.run_loop(screen)
-
-
-class SingleItemPicker:
+class SingleItemPicker(Picker):
     def __init__(self, options: list[str], title: str) -> None:
         self.index = 0
         self.title = title
@@ -141,39 +155,6 @@ class SingleItemPicker:
             elif c in KEYS_SELECT + KEYS_ENTER:
                 return [self.options[self.index]]
 
-    def move_up(self) -> None:
-        self.index -= 1
-        if self.index < 0:
-            self.index = len(self.options) - 1
-
-    def move_down(self) -> None:
-        self.index += 1
-        if self.index >= len(self.options):
-            self.index = 0
-
-    def draw(self, screen: Screen):
-        screen.clear()
-        x, y = 1, 1
-        max_y, max_x = screen.getmaxyx()
-        max_rows = max_y - y
-        lines, current_line = self.get_lines()
-        scroll_top = 0
-        if current_line > max_rows:
-            scroll_top = current_line - max_rows
-
-        lines_to_draw = lines[scroll_top : scroll_top + max_rows]
-
-        for line in lines_to_draw:
-            screen.addnstr(y, x, line, max_x - 2)
-            y += 1
-
-        screen.refresh()
-
-    def get_title_lines(self) -> list[str]:
-        if self.title:
-            return self.title.split("\n") + [""]
-        return []
-
     def get_option_lines(self) -> list[str]:
         lines: list[str] = []
         for index, option in enumerate(self.options):
@@ -183,17 +164,3 @@ class SingleItemPicker:
                 prefix = len("==>") * " "
             lines.append(f"{prefix} {option}")
         return lines
-
-    def get_lines(self) -> tuple[list[str], int]:
-        title_lines = self.get_title_lines()
-        option_lines = self.get_option_lines()
-        lines = title_lines + option_lines
-        current_line = self.index + len(title_lines) + 1
-        return lines, current_line
-
-    def start(self) -> list[str] | None:
-        return run_and_return_result(self._start)
-
-    def _start(self, screen: Screen):
-        config_curses()
-        return self.run_loop(screen)
