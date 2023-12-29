@@ -9,7 +9,7 @@
       "program": "{{entrypoint}}",
       "console": "integratedTerminal",
       "justMyCode": true,
-      "args": ["cmd1"]
+      "args": [{% if has_args %}"cmd1"{% endif %}]
     }{% if fast_api %},
     {
       "name": "FastApi",

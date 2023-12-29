@@ -263,6 +263,7 @@ class Scaffolder:
                     "entrypoint": f"{self.project_name}.py",
                     "fast_api": self.options.fast_api,
                     "scheduled_job": self.options.scheduled_job,
+                    "has_args": self.options.parse_args,
                 }
             )
         )
