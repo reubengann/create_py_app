@@ -4,7 +4,7 @@
   "configurations": [
     {
       "name": "Run Main",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "program": "{{entrypoint}}",
       "console": "integratedTerminal",
@@ -13,7 +13,7 @@
     }{% if fast_api %},
     {
       "name": "FastApi",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "uvicorn",
       "args": ["src.entry_points.api.app:app", "--reload"],
@@ -22,7 +22,7 @@
     }{% endif %}{% if scheduled_job %},
     {
       "name": "Scheduler",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "program": "src/entry_points/scheduled_job/scheduled_job.py",
       "console": "integratedTerminal",

@@ -3,7 +3,7 @@
     "configurations": [
         {
             "name": "Run Main",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "src\\create_py_app\\command.py",
             "justMyCode": true,
