@@ -259,7 +259,7 @@ class Scaffolder:
             vs_code_folder.mkdir()
         template = get_template("vs_code_launch_json_template.txt")
         if self.kind_of_thing == KindOfThing.TOOL:
-            entrypoint = f"src\\{self.project_name}\\command.py"
+            entrypoint = f"src/{self.project_name}/command.py"
         else:
             entrypoint = f"{self.project_name}.py"
         (vs_code_folder / "launch.json").write_text(
