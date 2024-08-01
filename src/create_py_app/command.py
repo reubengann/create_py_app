@@ -14,12 +14,12 @@ from create_py_app.pick import pick_multi, pick_single
 
 class KindOfThing(Enum):
     PROGRAM = 0
-    TOOL = 1
+    PACKAGE = 1
 
 
 KINDS_OF_THING = {
     "Program (something you run)": KindOfThing.PROGRAM,
-    "Tool    (something you pip install)": KindOfThing.TOOL,
+    "Package (something you pip install)": KindOfThing.PACKAGE,
 }
 
 PROGRAM_OPTIONS = [
@@ -31,6 +31,7 @@ PROGRAM_OPTIONS = [
     ("Set up Sqlalchemy ORM", False),
     ("Set up repository design pattern", False),
     ("Set up a file for configuring dependency injection", False),
+    ("Add TkInter UI", False),
 ]
 
 COMMON_OPTIONS = [
@@ -54,6 +55,7 @@ class ScaffoldOptions:
     repo_pattern: bool
     di_setup: bool
     set_up_git: bool
+    tkinter: bool
 
 
 def parse_options(kind: KindOfThing, selected: list[str]) -> ScaffoldOptions:
@@ -70,6 +72,7 @@ def parse_options(kind: KindOfThing, selected: list[str]) -> ScaffoldOptions:
         repo_pattern="Set up repository design pattern" in selected,
         di_setup="Set up a file for configuring dependency injection" in selected,
         set_up_git="Set up Git" in selected,
+        tkinter="Add TkInter UI" in selected,
     )
 
 
@@ -89,7 +92,7 @@ class Scaffolder:
         self.project_folder = project_folder
         self.options = options
         self.src_folder = self.project_folder / "src"
-        if self.kind_of_thing == KindOfThing.TOOL:
+        if self.kind_of_thing == KindOfThing.PACKAGE:
             self.src_folder = self.src_folder / project_name
         self.test_folder = self.project_folder / "test"
 
@@ -104,7 +107,7 @@ class Scaffolder:
         self.create_coverage()
         self.set_up_testing()
         self.make_readme()
-        if self.options.kind == KindOfThing.TOOL:
+        if self.options.kind == KindOfThing.PACKAGE:
             self.write_pyproject_toml()
             self.write_main_script(self.src_folder / "command.py")
         if self.options.vs_code:
@@ -123,6 +126,12 @@ class Scaffolder:
             self.add_scheduled_job_entry_point()
         if self.options.di_setup:
             self.add_configure_services()
+        if self.options.tkinter:
+            self.add_tkinter()
+
+    def add_tkinter(self):
+        template = get_template("user_interface_template.txt")
+        (self.src_folder / "user_interface.py").write_text(template.render())
 
     def add_configure_services(self):
         template = get_template("configure_services_template.txt")
@@ -237,7 +246,7 @@ class Scaffolder:
         (self.project_folder / "requirements-dev.in").write_text(template.render())
 
     def maybe_create_folders(self):
-        if self.kind_of_thing == KindOfThing.TOOL:
+        if self.kind_of_thing == KindOfThing.PACKAGE:
             if not self.src_folder.parent.exists():
                 self.src_folder.parent.mkdir()
         if not self.src_folder.exists():
@@ -258,7 +267,7 @@ class Scaffolder:
         if not vs_code_folder.exists():
             vs_code_folder.mkdir()
         template = get_template("vs_code_launch_json_template.txt")
-        if self.kind_of_thing == KindOfThing.TOOL:
+        if self.kind_of_thing == KindOfThing.PACKAGE:
             entrypoint = f"src/{self.project_name}/command.py"
         else:
             entrypoint = f"{self.project_name}.py"
@@ -281,6 +290,7 @@ class Scaffolder:
             "use_logging": self.options.use_logging,
             "env_settings": self.options.env_settings,
             "parse_args": self.options.parse_args,
+            "tkinter": self.options.tkinter,
         }
         if not self.options.parse_args:
             context["empty_main"] = True

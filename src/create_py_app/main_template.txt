@@ -6,6 +6,11 @@ import sys
 {% if env_settings %}
 from src.project_settings import settings
 {% endif %}
+{%- if tkinter %}
+import tkinter as tk
+
+from src.user_interface import App
+{% endif %}
 
 def main() -> int:
 {%- if use_logging %}
@@ -17,7 +22,7 @@ def main() -> int:
 {% endif %}
 {%- if empty_main %}
     return 0
-{% endif %}
+{%- endif %}
 
 {%- if parse_args %}
     parser = argparse.ArgumentParser()
@@ -29,6 +34,9 @@ def main() -> int:
     # Add commands
     cmd1_p = subp.add_parser("cmd1", help="Do command 1")
     cmd2_p = subp.add_parser("cmd2", help="Do command 2")
+{%- if tkinter %}
+    ui_p = subp.add_parser("ui", help="Launch UI")
+{% endif %}
 
     # Add command line arguments to the commands
     # cmd1_p.add_argument("query")
@@ -48,9 +56,22 @@ def main() -> int:
             print("Running command 2")
 {%- endif %}
             return 0
+{%- if tkinter %}
+        case "ui":
+            root = tk.Tk()
+            app = App(root)
+            root.mainloop()
+            return 0
+{% endif %}
         case _:
             parser.print_help()
             return 1
+{% else %}
+{%- if tkinter %}
+    root = tk.Tk()
+    app = App(root)
+    root.mainloop()
+{% endif %}
 {% endif %}
 
 if __name__ == "__main__":

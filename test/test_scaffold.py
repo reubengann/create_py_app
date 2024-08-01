@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 import black
 
-from create_py_app.command import Scaffolder, ScaffoldOptions
+from create_py_app.command import Scaffolder, ScaffoldOptions, KindOfThing
 
 
 def format_using_black(s):
@@ -54,6 +54,7 @@ def test_creates_main_with_correct_filename():
         "foo",
         path,
         ScaffoldOptions(
+            kind=KindOfThing.PROGRAM,
             write_main_script=True,
             fast_api=False,
             parse_args=False,
@@ -64,6 +65,8 @@ def test_creates_main_with_correct_filename():
             sqla=False,
             repo_pattern=False,
             di_setup=False,
+            set_up_git=False,
+            tkinter=False,
         ),
     )
     dut.write()
@@ -76,6 +79,7 @@ def test_writes_empty_main_when_nothing_else_selected():
         "foo",
         path,
         ScaffoldOptions(
+            kind=KindOfThing.PROGRAM,
             write_main_script=True,
             fast_api=False,
             parse_args=False,
@@ -86,12 +90,16 @@ def test_writes_empty_main_when_nothing_else_selected():
             sqla=False,
             repo_pattern=False,
             di_setup=False,
+            set_up_git=False,
+            tkinter=False,
         ),
     )
     dut.write()
     main_file = path.created_paths["foo.py"]
     assert "def main() -> int:\n    return 0" in main_file.written_text()
-    assert main_file.written_text() == format_using_black(main_file.written_text())
+    actual = main_file.written_text()
+    expected = format_using_black(main_file.written_text())
+    assert actual == expected
 
 
 def test_writes_main_with_logging_when_selected():
@@ -100,6 +108,7 @@ def test_writes_main_with_logging_when_selected():
         "foo",
         path,
         ScaffoldOptions(
+            kind=KindOfThing.PROGRAM,
             write_main_script=True,
             fast_api=False,
             parse_args=False,
@@ -110,6 +119,8 @@ def test_writes_main_with_logging_when_selected():
             sqla=False,
             repo_pattern=False,
             di_setup=False,
+            set_up_git=False,
+            tkinter=False,
         ),
     )
     dut.write()
@@ -124,6 +135,7 @@ def test_writes_main_with_settings_imported_when_selected():
         "foo",
         path,
         ScaffoldOptions(
+            kind=KindOfThing.PROGRAM,
             write_main_script=True,
             fast_api=False,
             scheduled_job=False,
@@ -134,6 +146,8 @@ def test_writes_main_with_settings_imported_when_selected():
             sqla=False,
             repo_pattern=False,
             di_setup=False,
+            set_up_git=False,
+            tkinter=False,
         ),
     )
     dut.write()
@@ -147,6 +161,7 @@ def test_writes_main_with_argparse_when_selected():
         "foo",
         path,
         ScaffoldOptions(
+            kind=KindOfThing.PROGRAM,
             write_main_script=True,
             fast_api=False,
             parse_args=True,
@@ -157,12 +172,15 @@ def test_writes_main_with_argparse_when_selected():
             sqla=False,
             repo_pattern=False,
             di_setup=False,
+            set_up_git=False,
+            tkinter=False,
         ),
     )
     dut.write()
     main_file = path.created_paths["foo.py"]
     assert "parser = argparse.ArgumentParser()" in main_file.written_text()
-    assert main_file.written_text() == format_using_black(main_file.written_text())
+    actual = main_file.written_text()
+    assert actual == format_using_black(main_file.written_text())
 
 
 def test_writes_fastapi_to_requirements_when_selected():
@@ -171,6 +189,7 @@ def test_writes_fastapi_to_requirements_when_selected():
         "foo",
         path,
         ScaffoldOptions(
+            kind=KindOfThing.PROGRAM,
             write_main_script=False,
             fast_api=True,
             parse_args=False,
@@ -181,6 +200,8 @@ def test_writes_fastapi_to_requirements_when_selected():
             sqla=False,
             repo_pattern=False,
             di_setup=False,
+            set_up_git=False,
+            tkinter=False,
         ),
     )
     dut.write()
@@ -194,6 +215,7 @@ def test_writes_sqla_to_requirements_when_selected():
         "foo",
         path,
         ScaffoldOptions(
+            kind=KindOfThing.PROGRAM,
             write_main_script=False,
             fast_api=False,
             parse_args=False,
@@ -204,6 +226,8 @@ def test_writes_sqla_to_requirements_when_selected():
             sqla=True,
             repo_pattern=False,
             di_setup=False,
+            set_up_git=False,
+            tkinter=False,
         ),
     )
     dut.write()
@@ -217,6 +241,7 @@ def test_writes_pyd_sett_to_requirements_when_selected():
         "foo",
         path,
         ScaffoldOptions(
+            kind=KindOfThing.PROGRAM,
             write_main_script=False,
             fast_api=False,
             parse_args=False,
@@ -227,6 +252,8 @@ def test_writes_pyd_sett_to_requirements_when_selected():
             sqla=False,
             repo_pattern=False,
             di_setup=False,
+            set_up_git=False,
+            tkinter=False,
         ),
     )
     dut.write()
@@ -240,6 +267,7 @@ def test_writes_settings_file_when_selected():
         "foo",
         path,
         ScaffoldOptions(
+            kind=KindOfThing.PROGRAM,
             write_main_script=False,
             fast_api=False,
             parse_args=False,
@@ -250,6 +278,8 @@ def test_writes_settings_file_when_selected():
             sqla=False,
             repo_pattern=False,
             di_setup=False,
+            set_up_git=False,
+            tkinter=False,
         ),
     )
     dut.write()
@@ -266,6 +296,7 @@ def test_writes_vs_code_settings_when_selected():
         "foo",
         path,
         ScaffoldOptions(
+            kind=KindOfThing.PROGRAM,
             write_main_script=False,
             fast_api=False,
             parse_args=False,
@@ -276,6 +307,8 @@ def test_writes_vs_code_settings_when_selected():
             sqla=False,
             repo_pattern=False,
             di_setup=False,
+            set_up_git=False,
+            tkinter=False,
         ),
     )
     dut.write()
@@ -289,6 +322,7 @@ def test_writes_repo_patt_when_selected():
         "foo",
         path,
         ScaffoldOptions(
+            kind=KindOfThing.PROGRAM,
             write_main_script=False,
             fast_api=False,
             parse_args=False,
@@ -299,6 +333,8 @@ def test_writes_repo_patt_when_selected():
             sqla=False,
             repo_pattern=True,
             di_setup=False,
+            set_up_git=False,
+            tkinter=False,
         ),
     )
     dut.write()
@@ -313,6 +349,7 @@ def test_writes_example_repo_when_sqla_also_selected():
         "foo",
         path,
         ScaffoldOptions(
+            kind=KindOfThing.PROGRAM,
             write_main_script=False,
             fast_api=False,
             parse_args=False,
@@ -323,6 +360,8 @@ def test_writes_example_repo_when_sqla_also_selected():
             sqla=True,
             repo_pattern=True,
             di_setup=False,
+            set_up_git=False,
+            tkinter=False,
         ),
     )
     dut.write()
@@ -337,6 +376,7 @@ def test_writes_scheduled_job_when_selected():
         "foo",
         path,
         ScaffoldOptions(
+            kind=KindOfThing.PROGRAM,
             write_main_script=False,
             fast_api=False,
             parse_args=False,
@@ -347,6 +387,8 @@ def test_writes_scheduled_job_when_selected():
             sqla=False,
             repo_pattern=False,
             di_setup=False,
+            set_up_git=False,
+            tkinter=False,
         ),
     )
     dut.write()
@@ -366,6 +408,7 @@ def test_writes_apscheduler_when_scheduled_job_selected():
         "foo",
         path,
         ScaffoldOptions(
+            kind=KindOfThing.PROGRAM,
             write_main_script=False,
             fast_api=False,
             parse_args=False,
@@ -376,6 +419,8 @@ def test_writes_apscheduler_when_scheduled_job_selected():
             sqla=False,
             repo_pattern=False,
             di_setup=False,
+            set_up_git=False,
+            tkinter=False,
         ),
     )
     dut.write()
@@ -389,6 +434,7 @@ def test_writes_scheduled_job_to_vscode_when_selected():
         "foo",
         path,
         ScaffoldOptions(
+            kind=KindOfThing.PROGRAM,
             write_main_script=False,
             fast_api=False,
             parse_args=False,
@@ -399,6 +445,8 @@ def test_writes_scheduled_job_to_vscode_when_selected():
             sqla=False,
             repo_pattern=False,
             di_setup=False,
+            set_up_git=False,
+            tkinter=False,
         ),
     )
     dut.write()
@@ -415,6 +463,7 @@ def test_writes_configure_services_when_selected():
         "foo",
         path,
         ScaffoldOptions(
+            kind=KindOfThing.PROGRAM,
             write_main_script=False,
             fast_api=False,
             parse_args=False,
@@ -425,6 +474,8 @@ def test_writes_configure_services_when_selected():
             sqla=False,
             repo_pattern=False,
             di_setup=True,
+            set_up_git=False,
+            tkinter=False,
         ),
     )
     dut.write()
@@ -439,6 +490,7 @@ def test_writes_sqla_to_configure_services_when_selected():
         "foo",
         path,
         ScaffoldOptions(
+            kind=KindOfThing.PROGRAM,
             write_main_script=False,
             fast_api=False,
             parse_args=False,
@@ -449,6 +501,8 @@ def test_writes_sqla_to_configure_services_when_selected():
             sqla=True,
             repo_pattern=False,
             di_setup=True,
+            set_up_git=False,
+            tkinter=False,
         ),
     )
     dut.write()
